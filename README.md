@@ -1,102 +1,36 @@
 # GitHub Sign In Tests
 
-Три подхода к тестированию кнопки Sign In на GitHub.com с адаптацией под разные разрешения экрана.
+Автотесты кнопки Sign In на GitHub.com для десктопных и мобильных разрешений экрана.
 
-## Подход 1: Skip Approach (test_github_skip_approach.py)
+## Что тестируем
 
-**Как работает:** В каждом тесте проверяется разрешение экрана. Если оно не подходит - тест пропускается через pytest.skip().
+Открываем главную страницу GitHub, находим кнопку "Sign in", нажимаем на неё.
 
-**Код:**
-```python
-def is_mobile_screen():
-    return browser.config.window_width < 900
+## Как тестируем
 
-def test_desktop_sign_in_skip():
-    if is_mobile_screen():
-        pytest.skip("Только для десктопа")
-    browser.open("/")
-    browser.element("a.HeaderMenu-link--sign-in").click()
+Три подхода к организации тестов:
 
-def test_mobile_sign_in_skip():
-    if not is_mobile_screen():
-        pytest.skip("Только для мобилки")
-    browser.open("/")
-    browser.element("a[href='/login']").click()
-   ```
-Плюсы: Простота, наглядность, легко читать.
-Минусы: Логика дублируется в каждом тесте
+### 1. Skip Approach (`test_skip_approach.py`)
 
-Подход 2: Indirect Approach (test_github_indirect_approach.py)
-Как работает: Фикстура возвращает локатор в зависимости от параметра. Параметр передается через indirect=True.
-```python
-@pytest.fixture
-def sign_in_data(request):
-    if request.param == "desktop":
-        return "a.HeaderMenu-link--sign-in"
-    return "a[href='/login']"
+Фикстуры `desktop_sizes` и `mobile_sizes` сами прогоняют тест на всех разрешениях. Проверка внутри теста не нужна.
 
-@pytest.mark.parametrize("sign_in_data", ["desktop"], indirect=True)
-def test_desktop_indirect(sign_in_data):
-    browser.open("/")
-    browser.element(sign_in_data).click()
+### 2. Indirect Approach (`test_indirect_approach.py`)
 
-@pytest.mark.parametrize("sign_in_data", ["mobile"], indirect=True)
-def test_mobile_indirect(sign_in_data):
-    browser.open("/")
-    browser.element(sign_in_data).click()
-```
-Плюсы: Централизованная логика, гибкость.
-Минусы: Меньшая наглядность для новичков.
+Фикстура `sign_in_button` через `indirect=True` получает параметр ("desktop" или "mobile") и возвращает нужный локатор.
 
-Подход 3: Different Fixtures Approach (test_github_fixture_approach.py)
-Как работает: Создаются отдельные фикстуры для десктопа и мобилки. Тесты используют нужную фикстуру.
-```python
-@pytest.fixture
-def desktop_setup():
-    return "a.HeaderMenu-link--sign-in"
+### 3. Different Fixtures Approach (`test_fixture_approach.py`)
 
-@pytest.fixture
-def mobile_setup():
-    return "a[href='/login']"
+Две отдельные фикстуры: `desktop_button` и `mobile_button`. Каждый тест берёт свою.
 
-def test_desktop_fixture(desktop_setup):
-    browser.open("/")
-    browser.element(desktop_setup).click()
+## Какие разрешения
 
-def test_mobile_fixture(mobile_setup):
-    browser.open("/")
-    browser.element(mobile_setup).click()
-```
-**Плюсы:** Максимальная читаемость, явное разделение.
-
-**Минусы:** Больше кода.
-
----
-
-## Сравнение
-
-| Критерий | Skip | Indirect | Fixtures |
-|----------|------|----------|----------|
-| Простота | ★★★★★ | ★★★☆☆ | ★★★★☆ |
-| Читаемость | ★★★★☆ | ★★★☆☆ | ★★★★★ |
-| DRY | ★★☆☆☆ | ★★★★☆ | ★★★★☆ |
-
----
+| Тип | Разрешения |
+|-----|-------------|
+| Десктоп | 1920x1080, 1366x768, 1280x720 |
+| Мобильные | 375x667, 414x896, 360x780 |
 
 ## Запуск
 
 ```bash
 pip install -r requirements.txt
-```
-
-# Десктоп
-
-```bash
-pytest -v --window-size=1920x1080
-```
-
-# Мобилка
-
-```bash
-pytest -v --window-size=375x667
-```
+pytest tests/ -v
