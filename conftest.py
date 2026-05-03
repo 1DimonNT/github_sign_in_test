@@ -9,6 +9,7 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="function", autouse=True)
 def setup_browser(request):
+    """Базовая настройка браузера"""
     window_size = request.config.getoption("--window-size")
     width, height = map(int, window_size.split("x"))
 
@@ -25,15 +26,14 @@ def setup_browser(request):
     browser.quit()
 
 
-# Фикстуры с разными разрешениями
+# Фикстуры для fixture_approach и indirect_approach
 @pytest.fixture(params=[(1920, 1080), (1366, 768), (1280, 720)])
 def desktop_sizes(request):
     width, height = request.param
     browser.config.window_width = width
     browser.config.window_height = height
     print(f"\n=== Desktop test: {width}x{height} ===")
-    yield width
-    browser.quit()
+    return width
 
 
 @pytest.fixture(params=[(375, 667), (414, 896), (360, 780)])
@@ -42,5 +42,17 @@ def mobile_sizes(request):
     browser.config.window_width = width
     browser.config.window_height = height
     print(f"\n=== Mobile test: {width}x{height} ===")
-    yield width
-    browser.quit()
+    return width
+
+
+# Общая фикстура для skip_approach (все разрешения)
+@pytest.fixture(params=[
+    (1920, 1080), (1366, 768), (1280, 720),  # десктоп
+    (375, 667), (414, 896), (360, 780)  # мобилка
+])
+def all_sizes(request):
+    width, height = request.param
+    browser.config.window_width = width
+    browser.config.window_height = height
+    print(f"\n=== Testing all sizes: {width}x{height} ===")
+    return width

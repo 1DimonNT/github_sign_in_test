@@ -1,0 +1,24 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Logs and reports
+allure-results/
+allure-report/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

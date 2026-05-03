@@ -1,25 +1,24 @@
 import pytest
-from selene import browser, be
-from helpers.locators import DESKTOP_SIGN_IN, MOBILE_SIGN_IN
+from pages.github_main_page import GithubMainPage
 
 
 @pytest.fixture
 def desktop_button():
-    return DESKTOP_SIGN_IN
+    return "desktop"
 
 
 @pytest.fixture
 def mobile_button():
-    return MOBILE_SIGN_IN
+    return "mobile"
 
 
 def test_desktop_fixture(desktop_sizes, desktop_button):
-    browser.open("/")
-    browser.element(desktop_button).should(be.visible).click()
-    print("✅ Desktop Sign In clicked")
+    page = GithubMainPage()
+    page.open().click_sign_in(desktop_button)
+    print("✅ Desktop test with fixture approach")
 
 
 def test_mobile_fixture(mobile_sizes, mobile_button):
-    browser.open("/")
-    browser.element(mobile_button).should(be.visible).click()
-    print("✅ Mobile Sign In clicked")
+    page = GithubMainPage()
+    page.open().click_sign_in(mobile_button)
+    print("✅ Mobile test with fixture approach")

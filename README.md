@@ -1,36 +1,17 @@
-# GitHub Sign In Tests
-
-Автотесты кнопки Sign In на GitHub.com для десктопных и мобильных разрешений экрана.
-
-## Что тестируем
-
-Открываем главную страницу GitHub, находим кнопку "Sign in", нажимаем на неё.
-
 ## Как тестируем
 
 Три подхода к организации тестов:
 
 ### 1. Skip Approach (`test_skip_approach.py`)
 
-Фикстуры `desktop_sizes` и `mobile_sizes` сами прогоняют тест на всех разрешениях. Проверка внутри теста не нужна.
+Общая фикстура `all_sizes` прогоняет тест на всех 6 разрешениях (3 десктопных + 3 мобильных). Внутри теста проверяется ширина экрана:
+- Если разрешение не подходит для десктопа — тест пропускается через `pytest.skip()`
+- Если разрешение не подходит для мобилки — тест пропускается через `pytest.skip()`
 
 ### 2. Indirect Approach (`test_indirect_approach.py`)
 
-Фикстура `sign_in_button` через `indirect=True` получает параметр ("desktop" или "mobile") и возвращает нужный локатор.
+Фикстура `device` через `indirect=True` получает параметр ("desktop" или "mobile"). Page Object `GithubMainPage.click_sign_in()` использует нужный локатор.
 
 ### 3. Different Fixtures Approach (`test_fixture_approach.py`)
 
-Две отдельные фикстуры: `desktop_button` и `mobile_button`. Каждый тест берёт свою.
-
-## Какие разрешения
-
-| Тип | Разрешения |
-|-----|-------------|
-| Десктоп | 1920x1080, 1366x768, 1280x720 |
-| Мобильные | 375x667, 414x896, 360x780 |
-
-## Запуск
-
-```bash
-pip install -r requirements.txt
-pytest tests/ -v
+Две отдельные фикстуры: `desktop_button` и `mobile_button`. Каждая возвращает тип устройства. Тесты используют Page Object для клика.
